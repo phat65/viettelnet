@@ -14,6 +14,8 @@ Trong **Liên hệ & Zalo**, thêm nhiều người liên hệ: tên, số đi�
 
 ## Chạy toàn bộ bằng Docker
 
+**Deploy VPS với tên miền `viettelnet.store`:** xem [lệnh cài đặt, Nginx và HTTPS](docs/deploy-vps.md). `.env.example` dùng URL production; khi chạy local bằng file mẫu, đổi `NEXT_PUBLIC_SERVER_URL` về `http://localhost:3000`. Script `docker:setup` không ghi đè URL đã có.
+
 Mở Docker Desktop, rồi chạy tại thư mục dự án:
 
 ```powershell

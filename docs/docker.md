@@ -36,7 +36,7 @@ Mở http://localhost:3000/admin để đăng nhập. Không có email/mật kh�
 | `POSTGRES_PASSWORD` | Mật khẩu sinh ngẫu nhiên; dùng ký tự chữ/số/`_`/`-` để an toàn trong connection URI |
 | `POSTGRES_PORT` | Cổng PostgreSQL trên máy, mặc định 5432 |
 | `APP_PORT` | Cổng website trên máy, mặc định 3000 |
-| `NEXT_PUBLIC_SERVER_URL` | URL người dùng truy cập, mặc định `http://localhost:3000` |
+| `NEXT_PUBLIC_SERVER_URL` | URL người dùng truy cập; `.env.example` dùng `https://viettelnet.store`, local đổi về `http://localhost:3000` |
 | `PAYLOAD_SECRET` | Secret ký phiên đăng nhập; giữ ổn định qua các lần chạy |
 | `DATABASE_URL` | URL cho lệnh pnpm chạy trực tiếp trên máy; Compose tự dùng hostname `postgres` trong container |
 | `PAYLOAD_DB_PUSH` | Đặt `false` để quản lý schema bằng migration |
@@ -96,6 +96,6 @@ Sao lưu volume ảnh riêng nếu đã tải ảnh vào admin. Dừng hoặc bu
 
 ## Giới hạn hiện tại
 
-Cấu hình phục vụ local, cổng chỉ bind `127.0.0.1`. Chưa gồm tên miền, HTTPS, dịch vụ email và backup tự động. Khi triển khai lên máy chủ, cấu hình reverse proxy và sao lưu tương ứng.
+Các cổng Docker chỉ bind `127.0.0.1`. Đã có cấu hình Nginx cho `viettelnet.store` và hướng dẫn cấp/gia hạn HTTPS trong [deploy-vps.md](deploy-vps.md). Cần cài và xác minh trên VPS thật; dịch vụ email và backup tự động vẫn cần cấu hình riêng.
 
 Tham khảo: [Docker Compose startup order](https://docs.docker.com/compose/how-tos/startup-order/), [Next.js standalone](https://nextjs.org/docs/app/api-reference/config/next-config-js/output), [Payload migrations](https://payloadcms.com/docs/database/migrations).

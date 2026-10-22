@@ -1,4 +1,5 @@
 # syntax=docker/dockerfile:1
+ARG NEXT_PUBLIC_SERVER_URL=https://viettelnet.store
 FROM node:24-bookworm-slim AS base
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -16,7 +17,7 @@ RUN mkdir -p media && chown node:node /app media
 USER node
 
 FROM tooling AS builder
-ARG NEXT_PUBLIC_SERVER_URL=http://localhost:3000
+ARG NEXT_PUBLIC_SERVER_URL
 ENV NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL
 # Dynamic pages don't access the database during build. No real secret enters the image.
 RUN PAYLOAD_SECRET=build-only-placeholder-never-used-at-runtime \
@@ -26,10 +27,13 @@ RUN PAYLOAD_SECRET=build-only-placeholder-never-used-at-runtime \
 
 FROM node:24-bookworm-slim AS runner
 WORKDIR /app
+ARG NEXT_PUBLIC_SERVER_URL
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     HOSTNAME=0.0.0.0 \
-    PORT=3000
+    PORT=3000 \
+    NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL \
+    PAYLOAD_SERVER_URL=$NEXT_PUBLIC_SERVER_URL
 COPY --from=builder --chown=node:node /app/.next/standalone ./
 COPY --from=builder --chown=node:node /app/.next/static ./.next/static
 COPY --from=builder --chown=node:node /app/public ./public
