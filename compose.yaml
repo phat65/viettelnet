@@ -1,0 +1,73 @@
+name: viettel-sale-web
+
+x-app-environment: &app-environment
+  NODE_ENV: production
+  DATABASE_URL: postgresql://${POSTGRES_USER:-viettel}:${POSTGRES_PASSWORD:?Run pnpm docker:setup first}@postgres:5432/${POSTGRES_DB:-viettel_sale_web}
+  PAYLOAD_SECRET: ${PAYLOAD_SECRET:?Run pnpm docker:setup first}
+  NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL:-http://localhost:3000}
+  PAYLOAD_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL:-http://localhost:3000}
+  PAYLOAD_DB_PUSH: "false"
+
+services:
+  postgres:
+    image: postgres:17-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-viettel}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run pnpm docker:setup first}
+      POSTGRES_DB: ${POSTGRES_DB:-viettel_sale_web}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  migrate:
+    image: viettel-sale-web-tooling:local
+    build:
+      context: .
+      target: tooling
+    environment:
+      <<: *app-environment
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
+      BOOTSTRAP_ADMIN_NAME: ${BOOTSTRAP_ADMIN_NAME:-}
+    command: ["pnpm", "db:migrate"]
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app:
+    image: viettel-sale-web:local
+    build:
+      context: .
+      target: runner
+      args:
+        NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL:-http://localhost:3000}
+    environment: *app-environment
+    ports:
+      - "127.0.0.1:${APP_PORT:-3000}:3000"
+    volumes:
+      - media_data:/app/media
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  postgres_data:
+  media_data:

@@ -1,0 +1,17 @@
+node_modules
+.next
+.pnpm-store
+.git
+.env
+.env.*
+!.env.example
+media
+backups
+*.log
+*.tsbuildinfo
+README.md
+firstmove.md
+docs
+test-results
+playwright-report
+reference-internet.*

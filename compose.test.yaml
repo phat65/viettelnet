@@ -1,0 +1,16 @@
+# Run with -p viettel-sale-web-test to isolate the test database and media volumes.
+services:
+  migrate:
+    environment:
+      BOOTSTRAP_ADMIN_EMAIL: ${TEST_BOOTSTRAP_ADMIN_EMAIL:-bootstrap-test@example.test}
+      BOOTSTRAP_ADMIN_PASSWORD: ${TEST_BOOTSTRAP_ADMIN_PASSWORD:-}
+      BOOTSTRAP_ADMIN_NAME: Bootstrap test admin
+  postgres:
+    ports: !override
+      - "127.0.0.1:5434:5432"
+  app:
+    environment:
+      NEXT_PUBLIC_SERVER_URL: http://localhost:3100
+      PAYLOAD_SERVER_URL: http://localhost:3100
+    ports: !override
+      - "127.0.0.1:3100:3000"

@@ -1,0 +1,10 @@
+# Use a separate project name; never point this check at the main volumes.
+# docker compose -p viettel-sale-web-migration-test -f compose.yaml -f compose.migration-test.yaml up --abort-on-container-exit --exit-code-from migrate migrate
+services:
+  migrate:
+    environment:
+      BOOTSTRAP_ADMIN_EMAIL: ${TEST_BOOTSTRAP_ADMIN_EMAIL:-}
+      BOOTSTRAP_ADMIN_PASSWORD: ${TEST_BOOTSTRAP_ADMIN_PASSWORD:-}
+      BOOTSTRAP_ADMIN_NAME: Bootstrap test admin
+  postgres:
+    ports: !reset []

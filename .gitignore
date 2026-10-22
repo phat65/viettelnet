@@ -1,0 +1,25 @@
+node_modules/
+.next/
+.env*
+!.env.example
+media/
+backups/
+test-results/
+playwright-report/
+*.tsbuildinfo
+*.log
+.pnpm-store/
+
+# Local credentials and database exports
+*.pem
+*.key
+*.p12
+*.pfx
+*.dump
+*.backup
+*.sql.gz
+*.sql.zip
+
+# Local OS files
+.DS_Store
+Thumbs.db

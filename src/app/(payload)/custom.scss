@@ -1,0 +1,27 @@
+/* Keep Payload's accessible navigation and forms; use a restrained admin theme. */
+:root {
+  --font-body: Arial, Helvetica, sans-serif;
+  --style-radius-s: 6px;
+  --style-radius-m: 10px;
+  --style-radius-l: 12px;
+}
+
+html[data-theme='light'] {
+  --theme-bg: #fafafa;
+  --theme-elevation-0: #fff;
+  --theme-elevation-50: #f8f9fa;
+  --theme-elevation-100: #f0f1f3;
+  --theme-elevation-150: #e7e9ed;
+  --theme-elevation-200: #dfe2e7;
+  --theme-text: #20242c;
+}
+
+.nav { border-right: 1px solid var(--theme-elevation-150); }
+.nav__link { border-radius: 6px; }
+.collection-list .table { border: 1px solid var(--theme-elevation-150); border-radius: 10px; }
+.sales-welcome { margin-bottom: 32px; padding: 28px; border: 1px solid var(--theme-elevation-150); border-radius: 12px; background: var(--theme-elevation-0); }
+.sales-welcome__eyebrow { font-size: 11px; letter-spacing: .12em; opacity: .6; }
+.sales-welcome h1 { margin: 12px 0; font-size: 28px; }
+.sales-welcome p { opacity: .7; }
+.sales-welcome__links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+.sales-welcome__links a { padding: 10px 14px; border: 1px solid var(--theme-elevation-200); border-radius: 6px; text-decoration: none; }
