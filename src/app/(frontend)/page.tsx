@@ -1,9 +1,20 @@
 import Image from 'next/image'
+import type { Metadata } from 'next'
 import { getPackages } from '@/lib/queries'
 import { PackageList } from '@/components/packages/PackageList'
 import { RegistrationButton } from '@/components/forms/RegistrationButton'
 import { FrequentlyAskedQuestions } from '@/components/layout/FrequentlyAskedQuestions'
 import { Icon } from '@/components/ui/Icon'
+
+const title = 'Lắp mạng Viettel, Internet WiFi & TV360 | Viettelnet'
+const description = 'Xem các gói Internet Viettel, TV360, Camera và Mesh WiFi. So sánh giá theo khu vực, thiết bị đi kèm và đăng ký tư vấn lắp đặt tại địa chỉ của bạn.'
+
+export const metadata: Metadata = {
+  title: { absolute: title },
+  description,
+  alternates: { canonical: '/' },
+  openGraph: { title, description, url: '/', siteName: 'Viettelnet', locale: 'vi_VN', type: 'website' },
+}
 
 export default async function Home() {
   const packages = await getPackages()
@@ -13,7 +24,7 @@ export default async function Home() {
         <h1>Trải nghiệm Internet<br /><em>không giới hạn.</em></h1>
         <p className="hero-description">Làm việc hết mình. Giải trí hết ý.<br />Một kết nối cho mọi khoảnh khắc bên nhau.</p>
         <div className="hero-price"><span>Chỉ từ</span><strong>195.000<small>đ</small></strong><span>/ tháng</span></div>
-        <a href="#goi-cuoc" className="button button--large">Tìm gói phù hợp <Icon name="arrow" width="19" height="19" /></a>
+        <a href="/internet" className="button button--large">Tìm gói phù hợp <Icon name="arrow" width="19" height="19" /></a>
         <p className="hero-price-note">Giá tham khảo, xác nhận theo địa chỉ lắp đặt.</p>
       </div>
       <div className="hero-art">
@@ -58,15 +69,15 @@ export default async function Home() {
     </section>
     <section className="container lifestyle-section"><div className="center-heading"><span className="eyebrow">CHO MỌI NHỊP SỐNG</span><h2>Internet dành riêng cho cách bạn sống</h2><p>Cá nhân, gia đình hay game thủ — luôn có một lựa chọn phù hợp.</p></div>
       <div className="lifestyle-grid">
-        <a href="#individual"><span className="lifestyle-icon"><Icon name="work" width="30" height="30" /></span><span className="eyebrow">LÀM VIỆC & HỌC TẬP</span><h3>Kết nối công việc.<br />Giữ trọn cảm hứng.</h3><p>Học online, họp trực tuyến và làm việc từ xa, ngay trong không gian của bạn.</p><span className="text-link">Xem gói cá nhân <Icon name="arrow" width="17" height="17" /></span></a>
-        <a href="#entertainment"><span className="lifestyle-icon"><Icon name="users" width="30" height="30" /></span><span className="eyebrow">CHO CẢ GIA ĐÌNH</span><h3>Cùng nhau chia sẻ.<br />Cùng nhau tận hưởng.</h3><p>Kết nối nhiều thiết bị, xem phim và giải trí để cả nhà thêm gần nhau.</p><span className="text-link">Khám phá gói giải trí <Icon name="arrow" width="17" height="17" /></span></a>
-        <a href="#ultra"><span className="lifestyle-icon"><Icon name="game" width="30" height="30" /></span><span className="eyebrow">GAME & STREAMING</span><h3>Bứt phá tốc độ.<br />Bắt trọn khoảnh khắc.</h3><p>Khám phá đường truyền đến 1Gbps cho nhu cầu chơi game và streaming.</p><span className="text-link">Trải nghiệm Ultra Speed <Icon name="arrow" width="17" height="17" /></span></a>
+        <a href="/internet/ca-nhan"><span className="lifestyle-icon"><Icon name="work" width="30" height="30" /></span><span className="eyebrow">LÀM VIỆC & HỌC TẬP</span><h3>Kết nối công việc.<br />Giữ trọn cảm hứng.</h3><p>Học online, họp trực tuyến và làm việc từ xa, ngay trong không gian của bạn.</p><span className="text-link">Xem gói cá nhân <Icon name="arrow" width="17" height="17" /></span></a>
+        <a href="/internet/tv360"><span className="lifestyle-icon"><Icon name="users" width="30" height="30" /></span><span className="eyebrow">CHO CẢ GIA ĐÌNH</span><h3>Cùng nhau chia sẻ.<br />Cùng nhau tận hưởng.</h3><p>Kết nối nhiều thiết bị, xem phim và giải trí để cả nhà thêm gần nhau.</p><span className="text-link">Khám phá gói giải trí <Icon name="arrow" width="17" height="17" /></span></a>
+        <a href="/internet/ultra-speed"><span className="lifestyle-icon"><Icon name="game" width="30" height="30" /></span><span className="eyebrow">GAME & STREAMING</span><h3>Bứt phá tốc độ.<br />Bắt trọn khoảnh khắc.</h3><p>Khám phá đường truyền đến 1Gbps cho nhu cầu chơi game và streaming.</p><span className="text-link">Trải nghiệm Ultra Speed <Icon name="arrow" width="17" height="17" /></span></a>
       </div>
     </section>
     <section className="mesh-section"><div className="container mesh-inner">
       <div><span className="eyebrow">HOMEWIFI · PHỦ SÓNG CẢ NHÀ</span><h2>Tầng nào cũng gần.<br />Góc nào cũng kết nối.</h2><p>Mesh WiFi mở rộng vùng phủ, giúp kết nối đi xa hơn trong không gian nhiều phòng và nhiều tầng.</p>
         <ul className="check-list"><li><Icon name="check" />Mở rộng vùng phủ WiFi</li><li><Icon name="check" />Linh hoạt bố trí theo không gian</li><li><Icon name="check" />Lựa chọn 1, 2 hoặc 3 Mesh theo gói</li></ul>
-        <a className="button button--secondary" href="#mesh">Xem gói Mesh WiFi <Icon name="arrow" width="17" height="17" /></a>
+        <a className="button button--secondary" href="/internet/mesh-wifi">Xem gói Mesh WiFi <Icon name="arrow" width="17" height="17" /></a>
       </div><figure><Image src="/images/internet-statements.png" alt="Hình minh họa modem, Mesh WiFi và camera Viettel" width={698} height={403} sizes="(max-width: 700px) 90vw, 580px" /><figcaption>Hình minh họa. Thiết bị đi kèm được ghi riêng trong từng gói.</figcaption></figure>
     </div></section>
     <FrequentlyAskedQuestions />

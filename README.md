@@ -4,13 +4,17 @@ Website showcase theo [seccondmove.md](./seccondmove.md), trên kiến trúc [fi
 
 ## Nội dung có sẵn
 
-18 gói được nạp tự động bằng migration, chia thành 6 nhóm: ưu đãi, cá nhân, TV360, Camera, Mesh cho nhà nhiều tầng và Ultra Speed. Mỗi gói có trang riêng `/goi-cuoc/<slug>` (ví dụ `/goi-cuoc/netvt1`, `/goi-cuoc/meshvt1-cam1`, `/goi-cuoc/giga4`).
+Menu dùng các trang `/internet`, `/internet/tv360`, `/internet/camera`, `/internet/mesh-wifi`, `/internet/ultra-speed` và `/internet/uu-dai`. Trang nhóm có nội dung giới thiệu, danh sách gói riêng và liên kết qua lại. URL cũ `/goi-cuoc/<slug>` chuyển hướng 308 sang `/internet/<slug>`, giữ vùng giá đang chọn. Xem [bảng đường dẫn](docs/seo.md).
+
+18 gói được nạp tự động bằng migration, chia thành 6 nhóm: ưu đãi, cá nhân, TV360, Camera, Mesh cho nhà nhiều tầng và Ultra Speed. Mỗi gói có trang riêng `/internet/<slug>` (ví dụ `/internet/netvt1`, `/internet/meshvt1-cam1`, `/internet/giga4`).
 
 Admin có thể **thêm/sửa gói trong 6 nhóm có sẵn**, nhập giá riêng cho Hà Nội & TP.HCM / tỉnh thành khác, thiết bị, hình ảnh và bài viết chi tiết bằng trình soạn thảo. Đặt trạng thái **Đang bán** để hiện trên website. Mỗi thẻ có lựa chọn vùng giá riêng và đổi giá ngay; lựa chọn được giữ khi mở chi tiết. Form đăng ký chọn địa chỉ thực tế, độc lập với vùng xem giá.
 
 Bảng giá ban đầu được đối chiếu ViettelUp ngày 21/10/2026. GIGA chỉ có giá Hà Nội & TP.HCM; khu vực khác hiện “Liên hệ”. NETVT1 có phí hòa mạng 300.000đ và miễn phí lắp đặt theo ảnh mẫu; các khoản chưa xác nhận của gói khác được để trống. Giá, phí và thông số được hiển thị tự động trên trang chi tiết; bài viết riêng dùng cho ưu điểm, đối tượng phù hợp, hướng dẫn và FAQ, tránh nhập lặp bảng giá.
 
-Trong **Liên hệ & Zalo**, thêm nhiều người liên hệ: tên, số điện thoại, bật/tắt Zalo, link Zalo tùy chọn và trạng thái hiển thị. Nếu bỏ trống link Zalo, hệ thống dùng số di động. Khách bấm **Chat Zalo** hoặc **Gọi tư vấn**, chọn người rồi mở đúng link/số tương ứng. Chưa có người liên hệ thì website vẫn nhận form, không hiển thị số mẫu.
+Trong **Đơn vị & Liên hệ**, thêm nhiều người liên hệ: tên, số điện thoại, bật/tắt Zalo, link Zalo tùy chọn và trạng thái hiển thị. Nếu bỏ trống link Zalo, hệ thống dùng số di động. Khách bấm **Chat Zalo** hoặc **Gọi tư vấn**, chọn người rồi mở đúng link/số tương ứng. Chưa có người liên hệ thì website vẫn nhận form, không hiển thị số mẫu.
+
+**Nội dung danh mục** cho phép sửa giới thiệu, bài tư vấn, FAQ và SEO của `/internet` cùng sáu nhóm dịch vụ. **Đơn vị & Liên hệ** cũng quản lý thông tin ở footer và nội dung `/gioi-thieu`, `/lien-he`, `/chinh-sach-bao-mat`. Lưu là xuất bản ngay; xem [hướng dẫn nội dung và SEO](docs/seo.md).
 
 ## Chạy toàn bộ bằng Docker
 
@@ -67,7 +71,7 @@ pnpm dev
 - Website: `http://localhost:3000`.
 - Quản trị: `http://localhost:3000/admin`.
 - Database mới cần điền `BOOTSTRAP_ADMIN_EMAIL` và `BOOTSTRAP_ADMIN_PASSWORD` trong `.env` trước khi chạy migration. Migration tạo đúng một quản trị viên bằng cơ chế hash mật khẩu của Payload. Nếu đã có tài khoản, giữ nguyên tất cả tài khoản/mật khẩu và bỏ qua seed. Xem [hướng dẫn bootstrap admin](docs/bootstrap-admin.md).
-- Điền **Liên hệ & Zalo** với các số thực tế của bạn.
+- Điền **Đơn vị & Liên hệ** với thông tin và các số thực tế của bạn.
 - **Gói cước** được nạp sẵn khi chạy migration; có thể thêm gói, chọn mục gói cước, chỉnh giá và nội dung chi tiết.
 - Mở trang chi tiết, gửi form rồi kiểm tra **Người đăng ký** để biết khách chọn gói nào.
 
@@ -83,7 +87,7 @@ scripts/setup-docker.mjs        Chuẩn bị .env, giữ nguyên secret hiện c
 src/
   app/
     (frontend)/                Layout, trang chủ, trang 404
-      goi-cuoc/[slug]/          Mẫu chi tiết chung cho mọi gói
+      internet/[slug]/          Mẫu chi tiết chung cho mọi gói
     (payload)/                 Layout, stylesheet admin, route Payload
       admin/[[...segments]]/   Admin và đăng nhập
       api/[...slug]/           REST API có kiểm soát truy cập
@@ -120,7 +124,7 @@ Giữ cơ chế đăng nhập, sidebar, bảng danh sách, tìm kiếm, bộ l�
 
 Menu:
 
-- **Kinh doanh:** Gói cước, Người đăng ký, Liên hệ & Zalo. Dashboard có lối tắt lọc từng nhóm gói.
+- **Kinh doanh:** Gói cước, Người đăng ký, Đơn vị & Liên hệ. **Nội dung:** Nội dung danh mục. Dashboard có lối tắt lọc từng nhóm gói.
 - **Nội dung:** Hình ảnh.
 - **Hệ thống:** Quản trị viên.
 
@@ -141,6 +145,8 @@ Danh mục địa chỉ được lưu tại `src/data/locations`, lấy từ [Pr
 Chống spam hiện là mức khởi đầu: honeypot và kiểm tra gửi lại qua database. Chưa chặn được bot đổi số hay yêu cầu đồng thời vượt qua bước kiểm tra. Cần bổ sung giới hạn request ở proxy/WAF hoặc CAPTCHA khi triển khai công khai. Chưa có tích hợp gọi điện, nhắn Zalo, analytics hay CRM.
 
 ## Kiểm tra và triển khai sau này
+
+Để Google tìm thấy website sau khi deploy: xem [hướng dẫn SEO và xác minh Search Console](docs/seo.md).
 
 Xem [báo cáo sẵn sàng triển khai](docs/deployment-readiness.md) trước khi mở public. `pnpm deploy:check` kiểm tra biến môi trường production, không in mật khẩu/secret. Cấu hình localhost hiện tại sẽ báo chưa có domain HTTPS; đó là kết quả dự kiến khi phát triển local.
 

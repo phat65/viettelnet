@@ -18,6 +18,16 @@ html[data-theme='light'] {
 
 .nav { border-right: 1px solid var(--theme-elevation-150); }
 .nav__link { border-radius: 6px; }
+.nav .nav-group__toggle {
+  color: #fff;
+  background: #303640;
+  border-radius: 6px;
+  padding: 8px 10px;
+  align-items: center;
+}
+.nav .nav-group__toggle:hover { color: #fff; background: #3d4552; }
+.nav .nav-group__toggle:focus-visible { color: #fff; outline: 2px solid #609cff; outline-offset: 2px; }
+.nav .nav-group__toggle .stroke { stroke: #fff; }
 .collection-list .table { border: 1px solid var(--theme-elevation-150); border-radius: 10px; }
 .sales-welcome { margin-bottom: 32px; padding: 28px; border: 1px solid var(--theme-elevation-150); border-radius: 12px; background: var(--theme-elevation-0); }
 .sales-welcome__eyebrow { font-size: 11px; letter-spacing: .12em; opacity: .6; }

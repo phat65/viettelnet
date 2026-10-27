@@ -13,6 +13,8 @@ Luồng truy cập: `https://viettelnet.store` → Nginx cổng 443 → `127.0.0
 
 Các lệnh dưới đây chạy trong Bash trên VPS, với quyền root qua `sudo -i`:
 
+Chạy riêng `sudo -i`, đợi dấu nhắc đổi thành `root@...#`, rồi mới dán các lệnh tiếp theo. Nếu đang ở tài khoản `ubuntu`, lệnh `install` vào `/var/www` hoặc `/etc/nginx` cần thêm `sudo`; lỗi `chmod ... Operation not permitted` có thể do thiếu quyền.
+
 ```bash
 sudo -i
 apt update
@@ -39,7 +41,7 @@ chmod 600 .env
 nano .env
 ```
 
-Giữ các mật khẩu/secret ngẫu nhiên vừa sinh. Điền email thật và mật khẩu admin riêng 16–128 ký tự vào các biến còn trống:
+Giữ các mật khẩu/secret ngẫu nhiên vừa sinh. Điền email thật và mật khẩu admin riêng 8–128 ký tự vào các biến còn trống:
 
 ```dotenv
 NEXT_PUBLIC_SERVER_URL=https://viettelnet.store

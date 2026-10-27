@@ -26,3 +26,8 @@ export const getSiteSettings = cache(async () => {
   const payload = await getCMS()
   return payload.findGlobal({ slug: 'site-settings', overrideAccess: false, depth: 1 })
 })
+
+export const getCatalogContent = cache(async () => {
+  const payload = await getCMS()
+  return payload.findGlobal({ slug: 'catalog-content', overrideAccess: false, depth: 1 })
+})

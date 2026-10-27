@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { adminOrPublished, isAdmin } from '@/access/isAdmin'
 import { catalogGroups } from '@/data/catalog'
+import { validatePackageSlug } from '@/lib/catalogRoutes'
 
 export const Packages: CollectionConfig = {
   slug: 'packages',
@@ -20,9 +21,8 @@ export const Packages: CollectionConfig = {
     },
     {
       name: 'slug', label: 'Đường dẫn', type: 'text', unique: true, required: true, index: true,
-      admin: { description: 'Ví dụ: internet-gia-dinh. Trang chi tiết được tạo tự động từ đường dẫn này.' },
-      validate: (value: unknown) => typeof value === 'string' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)
-        ? true : 'Dùng chữ thường không dấu, số và dấu gạch ngang.',
+      admin: { description: 'Ví dụ netvt1 → /internet/netvt1. Giữ nguyên đường dẫn sau khi xuất bản để không làm mất liên kết cũ.' },
+      validate: validatePackageSlug,
     },
     {
       name: 'category', label: 'Loại dịch vụ', type: 'select', required: true, defaultValue: 'internet', admin: { hidden: true },

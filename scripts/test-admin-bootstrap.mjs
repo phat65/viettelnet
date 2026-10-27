@@ -7,7 +7,8 @@ const base = {
   ...process.env,
   POSTGRES_USER: 'bootstrap_test', POSTGRES_DB: 'viettel_bootstrap_test',
   POSTGRES_PASSWORD: randomBytes(24).toString('hex'), PAYLOAD_SECRET: randomBytes(48).toString('hex'),
-  TEST_BOOTSTRAP_ADMIN_EMAIL: 'bootstrap-test@example.test', TEST_BOOTSTRAP_ADMIN_PASSWORD: randomBytes(24).toString('hex'),
+  // Exercise the minimum accepted length against real Payload hashing and login.
+  TEST_BOOTSTRAP_ADMIN_EMAIL: 'bootstrap-test@example.test', TEST_BOOTSTRAP_ADMIN_PASSWORD: randomBytes(4).toString('hex'),
 }
 function run(command, env = base, shouldSucceed = true) {
   const result = spawnSync('docker', [...args, ...command], { env, encoding: 'utf8', maxBuffer: 5 * 1024 * 1024, windowsHide: true, timeout: 120_000 })

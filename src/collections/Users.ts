@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
+import { ValidationError } from 'payload'
 import { isAdmin } from '@/access/isAdmin'
+import { validateAdminPassword } from '@/lib/adminPassword'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -13,5 +15,15 @@ export const Users: CollectionConfig = {
   },
   admin: { useAsTitle: 'email', group: 'Hệ thống' },
   access: { admin: isAdmin, create: isAdmin, read: isAdmin, update: isAdmin, delete: isAdmin },
+  hooks: {
+    beforeValidate: [({ data }) => {
+      // An empty password on profile updates means keep the existing password.
+      if (data?.password !== undefined && data.password !== '') {
+        const result = validateAdminPassword(data.password)
+        if (result !== true) throw new ValidationError({ errors: [{ path: 'password', message: result }] })
+      }
+      return data
+    }],
+  },
   fields: [{ name: 'name', label: 'Họ tên', type: 'text' }],
 }

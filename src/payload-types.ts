@@ -93,9 +93,11 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     'site-settings': SiteSetting;
+    'catalog-content': CatalogContent;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    'catalog-content': CatalogContentSelect<false> | CatalogContentSelect<true>;
   };
   locale: null;
   widgets: {
@@ -163,7 +165,7 @@ export interface Package {
   name: string;
   catalogGroup: 'offers' | 'individual' | 'entertainment' | 'camera' | 'mesh' | 'ultra';
   /**
-   * Ví dụ: internet-gia-dinh. Trang chi tiết được tạo tự động từ đường dẫn này.
+   * Ví dụ netvt1 → /internet/netvt1. Giữ nguyên đường dẫn sau khi xuất bản để không làm mất liên kết cũ.
    */
   slug: string;
   category: 'internet' | 'tv360' | 'camera';
@@ -502,13 +504,86 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
- * Thêm các số tư vấn. Khách bấm Gọi hoặc Zalo trên website rồi chọn người muốn liên hệ.
+ * Thông tin công khai ở footer và các trang hỗ trợ. Nhập đúng đơn vị vận hành thực tế; các số liên hệ dùng chung cho website.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings".
  */
 export interface SiteSetting {
   id: number;
+  organization?: {
+    name?: string | null;
+    description?: string | null;
+    address?: string | null;
+    email?: string | null;
+    workingHours?: string | null;
+  };
+  about?: {
+    /**
+     * Để trống để dùng nội dung cơ bản. Thông tin đơn vị và các số liên hệ được lấy tự động từ cấu hình chung.
+     */
+    content?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    seoTitle?: string | null;
+    seoDescription?: string | null;
+  };
+  contact?: {
+    /**
+     * Để trống để dùng nội dung cơ bản. Thông tin đơn vị và các số liên hệ được lấy tự động từ cấu hình chung.
+     */
+    content?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    seoTitle?: string | null;
+    seoDescription?: string | null;
+  };
+  privacy?: {
+    /**
+     * Để trống để dùng nội dung cơ bản. Thông tin đơn vị và các số liên hệ được lấy tự động từ cấu hình chung.
+     */
+    content?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    seoTitle?: string | null;
+    seoDescription?: string | null;
+  };
   /**
    * Có thể thêm nhiều số. Thứ tự ở đây cũng là thứ tự hiển thị trên website.
    */
@@ -536,10 +611,268 @@ export interface SiteSetting {
   createdAt?: string | null;
 }
 /**
+ * Chọn tab danh mục để sửa trang tương ứng. Đường dẫn và các gói giữ nguyên; để trống tiêu đề/giới thiệu/SEO sẽ dùng nội dung mặc định.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "catalog-content".
+ */
+export interface CatalogContent {
+  id: number;
+  internet?: {
+    heading?: string | null;
+    intro?: string | null;
+    /**
+     * Hiển thị dưới danh sách gói. Không cần nhập lại bảng giá.
+     */
+    advice?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    faq?:
+      | {
+          question: string;
+          answer: string;
+          id?: string | null;
+        }[]
+      | null;
+    seoTitle?: string | null;
+    seoDescription?: string | null;
+  };
+  offers?: {
+    heading?: string | null;
+    intro?: string | null;
+    /**
+     * Hiển thị dưới danh sách gói. Không cần nhập lại bảng giá.
+     */
+    advice?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    faq?:
+      | {
+          question: string;
+          answer: string;
+          id?: string | null;
+        }[]
+      | null;
+    seoTitle?: string | null;
+    seoDescription?: string | null;
+  };
+  individual?: {
+    heading?: string | null;
+    intro?: string | null;
+    /**
+     * Hiển thị dưới danh sách gói. Không cần nhập lại bảng giá.
+     */
+    advice?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    faq?:
+      | {
+          question: string;
+          answer: string;
+          id?: string | null;
+        }[]
+      | null;
+    seoTitle?: string | null;
+    seoDescription?: string | null;
+  };
+  entertainment?: {
+    heading?: string | null;
+    intro?: string | null;
+    /**
+     * Hiển thị dưới danh sách gói. Không cần nhập lại bảng giá.
+     */
+    advice?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    faq?:
+      | {
+          question: string;
+          answer: string;
+          id?: string | null;
+        }[]
+      | null;
+    seoTitle?: string | null;
+    seoDescription?: string | null;
+  };
+  camera?: {
+    heading?: string | null;
+    intro?: string | null;
+    /**
+     * Hiển thị dưới danh sách gói. Không cần nhập lại bảng giá.
+     */
+    advice?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    faq?:
+      | {
+          question: string;
+          answer: string;
+          id?: string | null;
+        }[]
+      | null;
+    seoTitle?: string | null;
+    seoDescription?: string | null;
+  };
+  mesh?: {
+    heading?: string | null;
+    intro?: string | null;
+    /**
+     * Hiển thị dưới danh sách gói. Không cần nhập lại bảng giá.
+     */
+    advice?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    faq?:
+      | {
+          question: string;
+          answer: string;
+          id?: string | null;
+        }[]
+      | null;
+    seoTitle?: string | null;
+    seoDescription?: string | null;
+  };
+  ultra?: {
+    heading?: string | null;
+    intro?: string | null;
+    /**
+     * Hiển thị dưới danh sách gói. Không cần nhập lại bảng giá.
+     */
+    advice?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    faq?:
+      | {
+          question: string;
+          answer: string;
+          id?: string | null;
+        }[]
+      | null;
+    seoTitle?: string | null;
+    seoDescription?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
+  organization?:
+    | T
+    | {
+        name?: T;
+        description?: T;
+        address?: T;
+        email?: T;
+        workingHours?: T;
+      };
+  about?:
+    | T
+    | {
+        content?: T;
+        seoTitle?: T;
+        seoDescription?: T;
+      };
+  contact?:
+    | T
+    | {
+        content?: T;
+        seoTitle?: T;
+        seoDescription?: T;
+      };
+  privacy?:
+    | T
+    | {
+        content?: T;
+        seoTitle?: T;
+        seoDescription?: T;
+      };
   contacts?:
     | T
     | {
@@ -557,6 +890,127 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   heroDescription?: T;
   banner?: T;
   footerText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "catalog-content_select".
+ */
+export interface CatalogContentSelect<T extends boolean = true> {
+  internet?:
+    | T
+    | {
+        heading?: T;
+        intro?: T;
+        advice?: T;
+        faq?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
+        seoTitle?: T;
+        seoDescription?: T;
+      };
+  offers?:
+    | T
+    | {
+        heading?: T;
+        intro?: T;
+        advice?: T;
+        faq?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
+        seoTitle?: T;
+        seoDescription?: T;
+      };
+  individual?:
+    | T
+    | {
+        heading?: T;
+        intro?: T;
+        advice?: T;
+        faq?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
+        seoTitle?: T;
+        seoDescription?: T;
+      };
+  entertainment?:
+    | T
+    | {
+        heading?: T;
+        intro?: T;
+        advice?: T;
+        faq?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
+        seoTitle?: T;
+        seoDescription?: T;
+      };
+  camera?:
+    | T
+    | {
+        heading?: T;
+        intro?: T;
+        advice?: T;
+        faq?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
+        seoTitle?: T;
+        seoDescription?: T;
+      };
+  mesh?:
+    | T
+    | {
+        heading?: T;
+        intro?: T;
+        advice?: T;
+        faq?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
+        seoTitle?: T;
+        seoDescription?: T;
+      };
+  ultra?:
+    | T
+    | {
+        heading?: T;
+        intro?: T;
+        advice?: T;
+        faq?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
+        seoTitle?: T;
+        seoDescription?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

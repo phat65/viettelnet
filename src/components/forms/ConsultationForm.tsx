@@ -72,7 +72,7 @@ export function ConsultationForm({ packageId, packageName, onClose }: {
     <label className="field" htmlFor={`${formId}-address`}><span className="sr-only">Địa chỉ cụ thể *</span>
       <input id={`${formId}-address`} name="addressLine" placeholder="Số nhà, tên đường / thôn, xóm *" required minLength={3} maxLength={250} autoComplete="street-address" />
     </label>
-    <p className="registration-privacy">Thông tin chỉ dùng để liên hệ tư vấn và hỗ trợ đăng ký.</p>
+    <p className="registration-privacy">Thông tin chỉ dùng để liên hệ tư vấn và hỗ trợ đăng ký. <a href="/chinh-sach-bao-mat" target="_blank" rel="noopener noreferrer">Chính sách bảo mật</a>.</p>
     {state.message && <p role="alert">{state.message}</p>}
     <div className="registration-actions">
       <button type="button" className="button button--secondary" onClick={onClose}>Đóng</button>

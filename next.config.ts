@@ -4,6 +4,9 @@ import { withPayload } from '@payloadcms/next/withPayload'
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   output: 'standalone',
+  async redirects() {
+    return [{ source: '/goi-cuoc/:slug', destination: '/internet/:slug', permanent: true }]
+  },
   async headers() {
     return [{
       source: '/:path*',

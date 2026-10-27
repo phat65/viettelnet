@@ -4,10 +4,22 @@ import { validContactPhone, validZaloUrl } from '@/lib/contacts'
 
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
-  label: 'Liên hệ & Zalo',
-  admin: { group: 'Kinh doanh', description: 'Thêm các số tư vấn. Khách bấm Gọi hoặc Zalo trên website rồi chọn người muốn liên hệ.' },
+  label: 'Đơn vị & Liên hệ',
+  admin: { group: 'Kinh doanh', description: 'Thông tin công khai ở footer và các trang hỗ trợ. Nhập đúng đơn vị vận hành thực tế; các số liên hệ dùng chung cho website.' },
   access: { read: () => true, update: isAdmin },
   fields: [
+    { name: 'organization', label: 'Đơn vị vận hành', type: 'group', fields: [
+      { name: 'name', label: 'Tên đơn vị / người vận hành', type: 'text' },
+      { name: 'description', label: 'Giới thiệu ngắn / vai trò', type: 'textarea' },
+      { name: 'address', label: 'Địa chỉ liên hệ', type: 'textarea' },
+      { name: 'email', label: 'Email liên hệ', type: 'email' },
+      { name: 'workingHours', label: 'Giờ tư vấn', type: 'text' },
+    ] },
+    { type: 'tabs', tabs: [
+      { label: 'Giới thiệu', fields: [{ name: 'about', label: 'Trang /gioi-thieu', type: 'group', fields: supportFields() }] },
+      { label: 'Liên hệ', fields: [{ name: 'contact', label: 'Trang /lien-he', type: 'group', fields: supportFields() }] },
+      { label: 'Chính sách bảo mật', fields: [{ name: 'privacy', label: 'Trang /chinh-sach-bao-mat', type: 'group', fields: supportFields() }] },
+    ] },
     {
       name: 'contacts', label: 'Danh sách liên hệ', type: 'array',
       labels: { singular: 'Người liên hệ', plural: 'Người liên hệ' },
@@ -39,4 +51,12 @@ export const SiteSettings: GlobalConfig = {
     { name: 'banner', label: 'Ảnh banner', type: 'upload', relationTo: 'media', admin: { hidden: true } },
     { name: 'footerText', label: 'Thông tin đơn vị tư vấn', type: 'textarea', admin: { hidden: true } },
   ],
+}
+
+function supportFields(): import('payload').Field[] {
+  return [
+    { name: 'content', label: 'Nội dung trang', type: 'richText', admin: { description: 'Để trống để dùng nội dung cơ bản. Thông tin đơn vị và các số liên hệ được lấy tự động từ cấu hình chung.' } },
+    { name: 'seoTitle', label: 'Tiêu đề SEO', type: 'text' },
+    { name: 'seoDescription', label: 'Mô tả SEO', type: 'textarea', maxLength: 180 },
+  ]
 }

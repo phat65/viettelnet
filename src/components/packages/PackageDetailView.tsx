@@ -8,6 +8,7 @@ import { packagePrice } from '@/lib/packagePresentation'
 import { catalogGroups } from '@/data/catalog'
 import { RegistrationButton } from '@/components/forms/RegistrationButton'
 import { RegionPicker } from './RegionPicker'
+import { groupPath, internetPath } from '@/lib/catalogRoutes'
 
 export function PackageDetailView({ item, initialRegion, children }: { item: Package; initialRegion: Region; children: ReactNode }) {
   const [region, setRegion] = useState(initialRegion)
@@ -20,7 +21,7 @@ export function PackageDetailView({ item, initialRegion, children }: { item: Pac
     window.history.replaceState(null, '', url)
   }
   return <>
-    <nav className="breadcrumbs" aria-label="Đường dẫn"><Link href="/">Trang chủ</Link><span>›</span><Link href={`/#${group?.id ?? 'goi-cuoc'}`}>{group?.label ?? 'Gói cước'}</Link><span>›</span><span>{item.name}</span></nav>
+    <nav className="breadcrumbs" aria-label="Đường dẫn"><Link href="/">Trang chủ</Link><span aria-hidden="true">›</span><Link href={internetPath}>Internet</Link>{group && <><span aria-hidden="true">›</span><Link href={groupPath(group.id)}>{group.id === 'individual' ? 'Cá nhân' : group.label}</Link></>}<span aria-hidden="true">›</span><span aria-current="page">{item.name}</span></nav>
     <h1 className="article-title">Gói Internet <span>{item.name}</span></h1>
     <div className="detail-grid detail-grid--article">
       <article className="package-article">

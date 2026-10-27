@@ -14,7 +14,7 @@ BOOTSTRAP_ADMIN_PASSWORD=
 BOOTSTRAP_ADMIN_NAME=
 ```
 
-Mật khẩu cần 16–128 ký tự, không dùng giá trị mẫu. Không commit `.env`, không gửi mật khẩu trong chat và không thêm mật khẩu vào Dockerfile. Nếu mật khẩu có `$` hoặc `#`, bao giá trị bằng dấu nháy đơn trong `.env` để Docker Compose không nội suy hoặc hiểu là comment.
+Mật khẩu cần 8–128 ký tự, không dùng giá trị mẫu. Không commit `.env`, không gửi mật khẩu trong chat và không thêm mật khẩu vào Dockerfile. Nếu mật khẩu có `$` hoặc `#`, bao giá trị bằng dấu nháy đơn trong `.env` để Docker Compose không nội suy hoặc hiểu là comment.
 
 ```powershell
 # Chạy trên môi trường đã cấu hình domain HTTPS thật.

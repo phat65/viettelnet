@@ -13,7 +13,7 @@ Trang tham khảo: https://www.viettelup.vn/internet
 | Banner giới thiệu và CTA cố định | `(frontend)/page.tsx`, `public/images/` |
 | Nhóm gói và giá theo khu vực | `Packages.ts`, `PackageList.ts` |
 | Thẻ gói với tốc độ, tiện ích, đăng ký | `PackageCard.tsx` |
-| Nội dung chi tiết theo gói | `goi-cuoc/[slug]/page.tsx`, `PackageDetailView.tsx`, `PackageArticle.tsx` |
+| Nội dung chi tiết theo gói | `internet/[slug]/page.tsx`, `PackageDetailView.tsx`, `PackageArticle.tsx` |
 | Yêu cầu tư vấn | `ConsultationForm.tsx`, `submitConsultation.ts`, `Leads.ts` |
 | Nhiều liên hệ và hộp chọn số | `SiteSettings.ts`, `contacts.ts`, `ContactButtons.tsx`, `Footer.tsx` |
 

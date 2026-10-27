@@ -2,17 +2,28 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import type { MigrateUpArgs } from '@payloadcms/db-postgres'
 import { bootstrapAdminCredentials, up, down } from '../src/migrations/20261022_000000_bootstrap_admin'
+import { validateAdminPassword } from '../src/lib/adminPassword'
 
 const valid = { BOOTSTRAP_ADMIN_EMAIL: ' Owner@Example.test ', BOOTSTRAP_ADMIN_PASSWORD: 'Test-only-long-password-42!', BOOTSTRAP_ADMIN_NAME: ' Chủ website ' }
 
 test('bootstrap validates credentials without leaking their values in errors', () => {
   assert.deepEqual(bootstrapAdminCredentials(valid), { email: 'owner@example.test', password: valid.BOOTSTRAP_ADMIN_PASSWORD, name: 'Chủ website' })
-  for (const change of [{ BOOTSTRAP_ADMIN_EMAIL: '' }, { BOOTSTRAP_ADMIN_EMAIL: 'invalid' }, { BOOTSTRAP_ADMIN_PASSWORD: '' }, { BOOTSTRAP_ADMIN_PASSWORD: 'short-secret' }, { BOOTSTRAP_ADMIN_PASSWORD: ' '.repeat(20) }, { BOOTSTRAP_ADMIN_PASSWORD: 'replace-with-a-password' }, { BOOTSTRAP_ADMIN_PASSWORD: 'x'.repeat(129) }]) {
+  for (const password of ['Abc123!x', 'x'.repeat(128)]) {
+    assert.equal(bootstrapAdminCredentials({ ...valid, BOOTSTRAP_ADMIN_PASSWORD: password }).password, password)
+  }
+  for (const change of [{ BOOTSTRAP_ADMIN_EMAIL: '' }, { BOOTSTRAP_ADMIN_EMAIL: 'invalid' }, { BOOTSTRAP_ADMIN_PASSWORD: '' }, { BOOTSTRAP_ADMIN_PASSWORD: 'Abc123!' }, { BOOTSTRAP_ADMIN_PASSWORD: ' '.repeat(20) }, { BOOTSTRAP_ADMIN_PASSWORD: 'replace-with-a-password' }, { BOOTSTRAP_ADMIN_PASSWORD: 'x'.repeat(129) }]) {
     assert.throws(() => bootstrapAdminCredentials({ ...valid, ...change }), error => {
       assert.ok(error instanceof Error)
       assert.equal(error.message.includes(valid.BOOTSTRAP_ADMIN_PASSWORD), false)
       return true
     })
+  }
+})
+
+test('admin password changes accept 8–128 characters and reject invalid input', () => {
+  for (const password of ['Abc123!x', 'x'.repeat(128)]) assert.equal(validateAdminPassword(password), true)
+  for (const password of ['Abc123!', 'x'.repeat(129), ' '.repeat(8), null, 12345678]) {
+    assert.equal(typeof validateAdminPassword(password), 'string')
   }
 })
 

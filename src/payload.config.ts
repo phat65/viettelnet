@@ -10,6 +10,7 @@ import { Packages } from '@/collections/Packages'
 import { Leads } from '@/collections/Leads'
 import { Media } from '@/collections/Media'
 import { SiteSettings } from '@/globals/SiteSettings'
+import { CatalogContent } from '@/globals/CatalogContent'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -25,7 +26,7 @@ export default buildConfig({
   },
   i18n: { fallbackLanguage: 'vi', supportedLanguages: { vi } },
   collections: [Users, Packages, Leads, Media],
-  globals: [SiteSettings],
+  globals: [SiteSettings, CatalogContent],
   db: postgresAdapter({
     pool: { connectionString: process.env.DATABASE_URL || '' },
     migrationDir: path.resolve(dirname, 'migrations'),

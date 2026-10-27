@@ -6,8 +6,8 @@ export function bootstrapAdminCredentials(env: Record<string, string | undefined
   const password = env.BOOTSTRAP_ADMIN_PASSWORD || ''
   const name = env.BOOTSTRAP_ADMIN_NAME?.trim() || 'Quản trị viên'
   if (!email.success) throw new Error('Empty users table: set BOOTSTRAP_ADMIN_EMAIL to a valid email before running migrations.')
-  if (password.length < 16 || password.length > 128 || !password.trim() || /^(replace-|change-me|your-password|example-password)/i.test(password)) {
-    throw new Error('Empty users table: set BOOTSTRAP_ADMIN_PASSWORD to a unique password of 16–128 characters, not a placeholder.')
+  if (password.length < 8 || password.length > 128 || !password.trim() || /^(replace-|change-me|your-password|example-password)/i.test(password)) {
+    throw new Error('Empty users table: set BOOTSTRAP_ADMIN_PASSWORD to a unique password of 8–128 characters, not a placeholder.')
   }
   if (name.length > 100) throw new Error('BOOTSTRAP_ADMIN_NAME must be at most 100 characters.')
   return { email: email.data, password, name }

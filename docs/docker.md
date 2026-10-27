@@ -23,7 +23,7 @@ node scripts/setup-docker.mjs
 docker compose up -d --build --wait
 ```
 
-Migration sẽ tạo quản trị viên đầu tiên từ `BOOTSTRAP_ADMIN_EMAIL` / `BOOTSTRAP_ADMIN_PASSWORD` khi bảng users còn trống. Mật khẩu cần 16–128 ký tự, không dùng giá trị mẫu. Nếu thiếu hoặc không hợp lệ, migration thất bại và Compose không khởi động app mới. Nếu đã có bất kỳ admin nào, tài khoản và mật khẩu hiện có được giữ nguyên, không cần biến bootstrap.
+Migration sẽ tạo quản trị viên đầu tiên từ `BOOTSTRAP_ADMIN_EMAIL` / `BOOTSTRAP_ADMIN_PASSWORD` khi bảng users còn trống. Mật khẩu cần 8–128 ký tự, không dùng giá trị mẫu. Nếu thiếu hoặc không hợp lệ, migration thất bại và Compose không khởi động app mới. Nếu đã có bất kỳ admin nào, tài khoản và mật khẩu hiện có được giữ nguyên, không cần biến bootstrap.
 
 Mở http://localhost:3000/admin để đăng nhập. Không có email/mật khẩu hardcode trong code. Xem [cấu hình bootstrap admin](bootstrap-admin.md). Chỉ container `migrate` nhận mật khẩu bootstrap; container `app` không nhận biến này.
 
@@ -41,7 +41,7 @@ Mở http://localhost:3000/admin để đăng nhập. Không có email/mật kh�
 | `DATABASE_URL` | URL cho lệnh pnpm chạy trực tiếp trên máy; Compose tự dùng hostname `postgres` trong container |
 | `PAYLOAD_DB_PUSH` | Đặt `false` để quản lý schema bằng migration |
 | `BOOTSTRAP_ADMIN_EMAIL` | Email quản trị viên đầu tiên; bắt buộc khi database chưa có tài khoản |
-| `BOOTSTRAP_ADMIN_PASSWORD` | Mật khẩu riêng 16–128 ký tự; không được ghi vào Git hoặc image |
+| `BOOTSTRAP_ADMIN_PASSWORD` | Mật khẩu riêng 8–128 ký tự; không được ghi vào Git hoặc image |
 | `BOOTSTRAP_ADMIN_NAME` | Tên hiển thị, không bắt buộc; mặc định `Quản trị viên` |
 
 Chạy lại script setup giữ nguyên mật khẩu và secret đang có. Script chỉ thay `DATABASE_URL` còn ở giá trị mẫu của scaffold hoặc chưa có; không ghi đè URL tùy chỉnh.

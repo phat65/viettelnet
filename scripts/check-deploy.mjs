@@ -28,8 +28,8 @@ for (const key of ['POSTGRES_USER', 'POSTGRES_DB']) {
 if (process.argv.includes('--first-deploy')) {
   check('Initial admin email is valid', z.email().safeParse(process.env.BOOTSTRAP_ADMIN_EMAIL?.trim()).success)
   const password = process.env.BOOTSTRAP_ADMIN_PASSWORD || ''
-  check('Initial admin password is 16–128 characters and not a placeholder',
-    password.length >= 16 && password.length <= 128 && password.trim() && !/^(replace-|change-me|your-password|example-password)/i.test(password))
+  check('Initial admin password is 8–128 characters and not a placeholder',
+    password.length >= 8 && password.length <= 128 && password.trim() && !/^(replace-|change-me|your-password|example-password)/i.test(password))
   check('Initial admin name is at most 100 characters', (process.env.BOOTSTRAP_ADMIN_NAME?.trim().length || 0) <= 100)
 }
 for (const { name, valid } of checks) console.log(`${valid ? 'PASS' : 'FAIL'} ${name}`)

@@ -5,6 +5,7 @@ import sharp from 'sharp'
 import { getPayload, type Payload } from 'payload'
 import config from '../../src/payload.config'
 import { catalog } from '../../src/data/catalog'
+import { catalogRoutes, groupPath } from '../../src/lib/catalogRoutes'
 
 const provinces: { code: string; name: string }[] = JSON.parse(readFileSync(new URL('../../src/data/locations/provinces.json', import.meta.url), 'utf8'))
 const wardCatalog: Record<string, { code: string; name: string }[]> = JSON.parse(readFileSync(new URL('../../src/data/locations/wards.json', import.meta.url), 'utf8'))
@@ -55,15 +56,126 @@ test('shows 18 packages, six groups, and a distinct detail page for every packag
   await page.locator('#offers').screenshot({ path: 'test-results/packages-offers.png' })
   await page.locator('#camera').screenshot({ path: 'test-results/packages-camera.png' })
   for (const entry of catalog) {
-    const response = await request.get(`/goi-cuoc/${entry.slug}`)
+    const response = await request.get(`/internet/${entry.slug}`)
     expect(response.status(), entry.slug).toBe(200)
     expect(await response.text()).toContain(entry.name)
   }
   await page.locator('.package-card').filter({ has: page.getByRole('heading', { name: 'NETVT1', exact: true }) }).getByRole('link', { name: /Khám phá chi tiết/ }).click()
-  await expect(page).toHaveURL(/\/goi-cuoc\/netvt1/)
+  await expect(page).toHaveURL(/\/internet\/netvt1/)
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Gói Internet NETVT1')
   await expect(page.getByText('1 Modem WiFi 6', { exact: true })).toBeVisible()
-  expect((await request.get('/goi-cuoc/khong-co-goi-nay')).status()).toBe(404)
+  expect((await request.get('/internet/khong-co-goi-nay')).status()).toBe(404)
+})
+
+test('category navigation, canonical URLs, sitemap and legacy redirects agree', async ({ page, request }) => {
+  const redirect = await request.get('/goi-cuoc/netvt1?khu-vuc=other&utm_source=legacy', { maxRedirects: 0 })
+  expect(redirect.status()).toBe(308)
+  const target = new URL(redirect.headers().location, 'http://localhost:3100')
+  expect(target.pathname).toBe('/internet/netvt1')
+  expect(target.searchParams.get('khu-vuc')).toBe('other')
+  expect(target.searchParams.get('utm_source')).toBe('legacy')
+
+  await page.goto('/internet')
+  await expect(page.locator('.package-card')).toHaveCount(18)
+  await page.getByRole('navigation', { name: 'Điều hướng chính' }).getByRole('link', { name: 'Camera', exact: true }).click()
+  await expect(page).toHaveURL(/\/internet\/camera$/)
+  await expect(page.locator('.package-card')).toHaveCount(4)
+  await expect(page.getByRole('navigation', { name: 'Điều hướng chính' }).getByRole('link', { name: 'Camera', exact: true })).toHaveAttribute('aria-current', 'page')
+  await page.evaluate(() => {
+    document.documentElement.style.scrollBehavior = 'auto'
+    window.scrollTo({ top: 0, behavior: 'instant' })
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
+  })
+  await page.screenshot({ path: 'test-results/catalog-camera-desktop.png', fullPage: true })
+
+  for (const groupId of Object.keys(catalogRoutes) as (keyof typeof catalogRoutes)[]) {
+    await page.goto(groupPath(groupId))
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(catalogRoutes[groupId].title)
+    await expect(page.locator('.package-card')).toHaveCount(catalog.filter((entry) => entry.group === groupId).length)
+    const canonical = await page.locator('link[rel="canonical"]').getAttribute('href')
+    expect(new URL(canonical!).pathname).toBe(groupPath(groupId))
+  }
+  await page.goto('/internet/netvt1?khu-vuc=other')
+  const canonical = new URL((await page.locator('link[rel="canonical"]').getAttribute('href'))!)
+  expect(canonical.pathname).toBe('/internet/netvt1')
+  expect(canonical.search).toBe('')
+  await expect(page.getByRole('navigation', { name: 'Đường dẫn' }).getByRole('link', { name: 'Cá nhân', exact: true })).toHaveAttribute('href', '/internet/ca-nhan')
+
+  const sitemap = await request.get('/sitemap.xml')
+  expect(sitemap.ok()).toBeTruthy()
+  const xml = await sitemap.text()
+  expect(xml).not.toContain('/goi-cuoc/')
+  expect(xml.match(/<loc>/g)).toHaveLength(29)
+  expect(xml).toContain('/internet/tv360</loc>')
+  expect(xml).toContain('/internet/netvt1</loc>')
+  for (const path of ['/gioi-thieu', '/lien-he', '/chinh-sach-bao-mat']) expect(xml).toContain(`${path}</loc>`)
+})
+
+test('admin edits catalog content and support pages; anonymous writes are denied', async ({ page, request }) => {
+  const previousCatalog = await cms.findGlobal({ slug: 'catalog-content' })
+  const previousSettings = await cms.findGlobal({ slug: 'site-settings' })
+  const richText = (text: string) => ({ root: { type: 'root', version: 1, format: '' as const, indent: 0, direction: 'ltr' as const, children: [
+    { type: 'paragraph', version: 1, format: '', indent: 0, direction: 'ltr', children: [{ type: 'text', version: 1, text, format: 0, detail: 0, mode: 'normal', style: '' }] },
+  ] } })
+  for (const slug of ['catalog-content', 'site-settings']) {
+    expect((await request.post(`/api/globals/${slug}`, { data: {} })).status()).toBe(403)
+  }
+  const login = await page.request.post('/api/users/login', { data: { email, password } })
+  expect(login.ok()).toBeTruthy()
+  const { token } = await login.json()
+  const headers = { Authorization: `JWT ${token}` }
+  try {
+    const saved = await page.request.post('/api/globals/catalog-content', { headers, data: { camera: {
+      heading: 'Camera cho gia đình thử nghiệm', intro: 'Giới thiệu từ quản trị danh mục.',
+      advice: richText('Tư vấn chọn camera từ admin.'),
+      faq: [{ question: 'Có kiểm tra địa chỉ không?', answer: 'Có, liên hệ để kiểm tra hạ tầng.' }],
+      seoTitle: 'Camera SEO thử nghiệm', seoDescription: 'Mô tả SEO camera thử nghiệm.',
+    } } })
+    expect(saved.ok(), await saved.text()).toBeTruthy()
+    await page.goto('/admin/globals/catalog-content')
+    await page.getByText('Camera', { exact: true }).click()
+    await page.getByLabel('Tiêu đề trang', { exact: true }).fill('Camera được sửa trực tiếp trong admin')
+    const response = page.waitForResponse((res) => res.url().includes('/api/globals/catalog-content') && res.request().method() === 'POST')
+    await page.getByRole('button', { name: /Lưu|Save/ }).last().click()
+    expect((await response).ok()).toBeTruthy()
+    await page.goto('/internet/camera')
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Camera được sửa trực tiếp trong admin')
+    await expect(page).toHaveTitle(/Camera SEO thử nghiệm/)
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', 'Mô tả SEO camera thử nghiệm.')
+    await expect(page.getByText('Tư vấn chọn camera từ admin.', { exact: true })).toBeVisible()
+    await page.getByText('Có kiểm tra địa chỉ không?', { exact: true }).click()
+    await expect(page.getByText('Có, liên hệ để kiểm tra hạ tầng.', { exact: true })).toBeVisible()
+    await expect(page.locator('.package-card')).toHaveCount(4)
+    await page.goto('/internet/tv360')
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(catalogRoutes.entertainment.title)
+    expect((await page.request.post('/api/globals/site-settings', { headers, data: {
+      organization: { name: 'Đơn vị thử nghiệm', address: 'Địa chỉ thử nghiệm', email: 'support@example.test', workingHours: '8:00–17:00' },
+      about: { content: richText('Giới thiệu được quản lý từ admin.'), seoTitle: 'Giới thiệu SEO thử nghiệm' },
+      contact: { content: richText('Liên hệ được quản lý từ admin.') },
+      privacy: { content: richText('Chính sách được quản lý từ admin.') },
+    } })).ok()).toBeTruthy()
+    for (const [path, text] of [['/gioi-thieu', 'Giới thiệu được quản lý từ admin.'], ['/lien-he', 'Liên hệ được quản lý từ admin.'], ['/chinh-sach-bao-mat', 'Chính sách được quản lý từ admin.']]) {
+      await page.goto(path)
+      await expect(page.getByText(text, { exact: true })).toBeVisible()
+      await expect(page.locator('footer')).toContainText('Đơn vị thử nghiệm')
+      await expect(page.locator('.support-contact')).toContainText('Địa chỉ thử nghiệm')
+      await expect(page.locator('.support-contact')).not.toContainText('Số đã ẩn')
+      const canonical = await page.locator('link[rel="canonical"]').getAttribute('href')
+      expect(new URL(canonical!).pathname).toBe(path)
+    }
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.screenshot({ path: 'test-results/support-mobile.png', fullPage: true })
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy()
+    await page.goto('/admin/globals/site-settings')
+    await expect(page.getByLabel('Tên đơn vị / người vận hành', { exact: true })).toHaveValue('Đơn vị thử nghiệm')
+    await page.getByText('Chính sách bảo mật', { exact: true }).click()
+    await expect(page.locator('[contenteditable="true"]').first()).toContainText('Chính sách được quản lý từ admin.')
+  } finally {
+    await cms.updateGlobal({ slug: 'catalog-content', data: { camera: previousCatalog.camera } })
+    await cms.updateGlobal({ slug: 'site-settings', data: {
+      organization: previousSettings.organization, about: previousSettings.about, contact: previousSettings.contact, privacy: previousSettings.privacy,
+    } })
+  }
 })
 
 test('chooses the matching Zalo link and telephone, with keyboard dismissal', async ({ page, context }) => {
@@ -99,12 +211,12 @@ test('each card changes regional price independently and keeps the selection on 
   await expect(page.locator('.price-details')).toContainText('235.000')
   await page.locator('.article-prices').getByRole('radio', { name: 'Tỉnh / thành khác' }).check()
   await expect(page.locator('.price-details')).toContainText('195.000')
-  await page.goto('/goi-cuoc/giga1?khu-vuc=other')
+  await page.goto('/internet/giga1?khu-vuc=other')
   await expect(page.locator('.article-prices')).toContainText('Chưa có giá cho khu vực này')
 })
 
 test('a registration is attached to the selected package and visible to admin', async ({ page }) => {
-  await page.goto('/goi-cuoc/meshvt1-cam1?khu-vuc=other')
+  await page.goto('/internet/meshvt1-cam1?khu-vuc=other')
   await expect(page.locator('.consultation-form')).toHaveCount(0)
   await page.getByRole('button', { name: 'Đăng ký gói MESHVT1_CAM1' }).click()
   const dialog = page.getByRole('dialog')
@@ -215,7 +327,7 @@ test('admin creates and edits grouped packages, prices and rich detail; public w
   } })
   expect(created.status(), await created.text()).toBe(201)
   const createdPackage = (await created.json()).doc
-  expect((await request.get('/goi-cuoc/browser-test-package')).status()).toBe(404)
+  expect((await request.get('/internet/browser-test-package')).status()).toBe(404)
   const saved = await request.patch(`/api/packages/${createdPackage.id}`, { headers, data: { status: 'published', detailContent: {
     root: { type: 'root', version: 1, format: '', indent: 0, direction: 'ltr', children: [
       { type: 'heading', tag: 'h2', version: 1, format: '', indent: 0, direction: 'ltr', children: [{ type: 'text', version: 1, text: 'Nội dung riêng từ admin', format: 0, detail: 0, mode: 'normal', style: '' }] },
@@ -234,7 +346,7 @@ test('admin creates and edits grouped packages, prices and rich detail; public w
     const result = await request.get(`/api/packages/${createdPackage.id}`, { headers })
     return JSON.stringify((await result.json()).detailContent)
   }).toContain('Nội dung được sửa trong trình soạn thảo')
-  await page.goto('/goi-cuoc/browser-test-package')
+  await page.goto('/internet/browser-test-package')
   await expect(page.locator('.package-article')).toContainText('Nội dung được sửa trong trình soạn thảo')
   await expect(page.locator('.price-details')).toContainText('315.000')
   await page.locator('.article-prices').getByRole('radio', { name: 'Tỉnh / thành khác' }).check()
@@ -257,7 +369,7 @@ test('mobile page and contact selector stay inside the viewport', async ({ page 
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy()
   await page.getByRole('button', { name: 'Mở menu gói cước' }).click()
   await page.getByRole('navigation', { name: 'Điều hướng chính' }).getByRole('link', { name: 'TV360', exact: true }).click()
-  await expect(page).toHaveURL(/#entertainment/)
+  await expect(page).toHaveURL(/\/internet\/tv360$/)
   await expect(page.getByRole('button', { name: 'Mở menu gói cước' })).toHaveAttribute('aria-expanded', 'false')
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
   await page.screenshot({ path: 'test-results/showcase-mobile.png', fullPage: true })
@@ -265,7 +377,7 @@ test('mobile page and contact selector stay inside the viewport', async ({ page 
   await page.locator('.contact-buttons').getByRole('button', { name: /Chat Zalo/ }).click()
   await expect(page.getByRole('dialog')).toBeVisible()
   await page.getByRole('button', { name: 'Đóng', exact: true }).click()
-  await page.goto('/goi-cuoc/giga4')
+  await page.goto('/internet/giga4')
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Gói Internet GIGA4')
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy()
   await page.screenshot({ path: 'test-results/detail-mobile.png', fullPage: true })

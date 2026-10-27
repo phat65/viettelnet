@@ -1,5 +1,30 @@
 @import "tailwindcss";
 
+.support-page { padding-block: 30px 64px; }
+.support-page h1 { font-size: clamp(28px, 4vw, 42px); margin-block: 24px; }
+.support-page, .managed-content { overflow-wrap: anywhere; }
+.managed-content { padding-block: 24px; line-height: 1.8; }
+.managed-content ul, .managed-content ol { padding-left: 24px; }
+.managed-content ul { list-style: disc; }
+.managed-content ol { list-style: decimal; }
+.managed-content a, .support-contact a:not(.button), .registration-privacy a { color: var(--red); text-decoration: underline; }
+.managed-content h2, .catalog-faq h2, .support-contact h2 { font-size: clamp(23px, 3vw, 30px); }
+.catalog-faq { padding-block: 24px; }
+.catalog-faq .faq-list p { white-space: pre-line; }
+.support-contact { border-top: 1px solid var(--line); padding-top: 24px; }
+.support-person { display: flex; flex-wrap: wrap; gap: 12px 24px; margin-block: 18px; }
+.support-contact > p, .site-footer p { white-space: pre-line; overflow-wrap: anywhere; }
+
+.catalog-intro { padding-block: 30px 24px; }
+.catalog-intro h1 { max-width: 900px; font-size: clamp(28px, 4vw, 42px); line-height: 1.2; margin: 24px 0 16px; }
+.catalog-intro > p, .catalog-help p { max-width: 850px; color: #666; }
+.catalog-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+.catalog-tabs a { border: 1px solid #e8e9e7; border-radius: 24px; padding: 9px 16px; font-size: 15px; }
+.catalog-tabs a:hover, .catalog-tabs a[aria-current="page"] { color: #c8122d; background: #fff3f3; border-color: #e51c39; }
+.catalog-intro .catalog-price-note { font-size: 14px; margin: 18px 0 0; }
+.catalog-help { padding-block: 36px 48px; }
+.site-header nav a[aria-current="page"] { color: #e51c39; text-decoration: underline; text-underline-offset: 6px; }
+
 @font-face { font-family: "Beau Sans"; src: url("/fonts/beau-sans-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
 @font-face { font-family: "Beau Sans"; src: url("/fonts/beau-sans-500.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
 @font-face { font-family: "Beau Sans"; src: url("/fonts/beau-sans-600.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: swap; }

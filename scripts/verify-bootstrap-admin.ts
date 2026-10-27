@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { getPayload } from 'payload'
+import { getPayload, ValidationError } from 'payload'
 import { sql } from '@payloadcms/db-postgres'
 import config from '../src/payload.config'
 
@@ -22,6 +22,13 @@ try {
     assert.notEqual(rows[0].hash, credentials.password)
     const login = await payload.login({ collection: 'users', data: credentials })
     assert.ok(login.token)
+    assert.ok(login.user)
+    await assert.rejects(
+      payload.update({ collection: 'users', id: login.user.id, overrideAccess: true, data: { password: 'short7!' } }),
+      error => error instanceof ValidationError,
+    )
+    await payload.update({ collection: 'users', id: login.user.id, overrideAccess: true, data: { name: 'Bootstrap test admin' } })
+    assert.ok((await payload.login({ collection: 'users', data: credentials })).token)
     // Never log the user object, token, password, hash or salt.
   }
   console.log(empty ? 'PASS: no account and no completed seed after failed bootstrap.' : 'PASS: one admin, hashed password, successful login and recorded migration.')
