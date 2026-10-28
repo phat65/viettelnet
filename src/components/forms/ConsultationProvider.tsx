@@ -4,7 +4,7 @@ import { createContext, useContext, useState, type ReactNode } from 'react'
 import { Modal } from '@/components/ui/Modal'
 import { ConsultationForm } from './ConsultationForm'
 
-type Selection = { packageId?: number; packageName?: string }
+type Selection = { packageId?: number; packageName?: string; provinceCode?: string }
 const ConsultationContext = createContext<((selection?: Selection) => void) | null>(null)
 
 export function ConsultationProvider({ children }: { children: ReactNode }) {

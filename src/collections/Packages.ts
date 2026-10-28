@@ -33,7 +33,8 @@ export const Packages: CollectionConfig = {
         { label: 'Internet + Camera', value: 'camera' },
       ],
     },
-    { name: 'speed', label: 'Tốc độ (Mbps)', type: 'number', min: 1, required: true },
+    { name: 'speed', label: 'Tốc độ (Mbps)', type: 'number', min: 0, required: true, admin: { description: 'Nhập 0 cho Camera/Cloud bán riêng, không bao gồm đường truyền Internet.' } },
+    { name: 'priceUnit', label: 'Đơn vị giá', type: 'text', defaultValue: '/tháng', maxLength: 32, admin: { description: 'Ví dụ /tháng, /tháng/camera hoặc /bộ. Ghi rõ thời hạn Cloud trong thiết bị/dịch vụ đi kèm.' } },
     { name: 'image', label: 'Ảnh minh họa', type: 'upload', relationTo: 'media' },
     {
       name: 'prices', label: 'Giá theo khu vực', type: 'array', minRows: 1, required: true,
@@ -46,7 +47,7 @@ export const Packages: CollectionConfig = {
             { label: 'Tỉnh / thành khác', value: 'other' },
           ],
         },
-        { name: 'monthlyPrice', label: 'Giá / tháng (VNĐ)', type: 'number', min: 0, required: true },
+        { name: 'monthlyPrice', label: 'Giá theo kỳ (VNĐ)', type: 'number', min: 0, required: true },
         { name: 'installationFee', label: 'Phí lắp đặt (VNĐ)', type: 'number', min: 0 },
         { name: 'activationFee', label: 'Phí hòa mạng (VNĐ)', type: 'number', min: 0 },
         { name: 'commitmentMonths', label: 'Cam kết (tháng)', type: 'number', min: 0 },

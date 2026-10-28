@@ -6,6 +6,8 @@ import * as migration_20261021_072000_regional_catalog from './20261021_072000_r
 import * as migration_20261021_174014_registration_addresses from './20261021_174014_registration_addresses';
 import * as migration_20261022_000000_bootstrap_admin from './20261022_000000_bootstrap_admin';
 import * as migration_20261026_175832_editable_site_content from './20261026_175832_editable_site_content';
+import * as migration_20261028_160000_photo_catalog from './20261028_160000_photo_catalog';
+import * as migration_20261028_234000_remove_storage_packages from './20261028_234000_remove_storage_packages';
 
 export const migrations = [
   {
@@ -47,5 +49,15 @@ export const migrations = [
     up: migration_20261026_175832_editable_site_content.up,
     down: migration_20261026_175832_editable_site_content.down,
     name: '20261026_175832_editable_site_content'
+  },
+  {
+    up: migration_20261028_160000_photo_catalog.up,
+    down: migration_20261028_160000_photo_catalog.down,
+    name: '20261028_160000_photo_catalog',
+  },
+  {
+    up: migration_20261028_234000_remove_storage_packages.up,
+    down: migration_20261028_234000_remove_storage_packages.down,
+    name: '20261028_234000_remove_storage_packages',
   },
 ];

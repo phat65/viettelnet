@@ -1,7 +1,7 @@
 import { sql, type MigrateDownArgs, type MigrateUpArgs } from '@payloadcms/db-postgres'
 import { catalog, catalogConditions } from './data/showcase-v1'
 
-export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+export async function up({ db }: MigrateUpArgs): Promise<void> {
   // Separate migration: PostgreSQL must commit the new enum value before using it.
   for (const [index, entry] of catalog.entries()) {
     // Use this migration's columns, not the evolving collection schema. Each package
@@ -23,14 +23,20 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   }
 
   // Keep the old single contact when upgrading an installation that has one.
-  const settings = await payload.findGlobal({ slug: 'site-settings', req, overrideAccess: true })
-  if (!settings.contacts?.length && settings.hotline) {
+  // Later globals fields are not present yet during a fresh installation.
+  const { rows } = await db.execute<{ id: number; hotline: string | null; zalo_url: string | null }>(sql`
+    SELECT id, hotline, zalo_url FROM site_settings
+    WHERE NOT EXISTS (SELECT 1 FROM site_settings_contacts WHERE _parent_id = site_settings.id)
+  `)
+  for (const settings of rows) {
+    if (!settings.hotline) continue
     const phone = settings.hotline.replace(/[\s().-]/g, '').replace(/^\+?84(?=\d{9,10}$)/, '0')
     if (/^(0\d{9,10}|1[89]00\d{4,6})$/.test(phone)) {
-      await payload.updateGlobal({
-        slug: 'site-settings', req, overrideAccess: true,
-        data: { contacts: [{ name: 'Tư vấn lắp đặt', phone, zaloUrl: settings.zaloUrl, zaloEnabled: true, enabled: true }] },
-      })
+      await db.execute(sql`
+        INSERT INTO site_settings_contacts (_order, _parent_id, id, name, phone, zalo_url, zalo_enabled, enabled)
+        VALUES (1, ${settings.id}, ${`legacy-contact-${settings.id}`}, 'Tư vấn lắp đặt', ${phone}, ${settings.zalo_url}, true, true)
+        ON CONFLICT (id) DO NOTHING
+      `)
     }
   }
 }

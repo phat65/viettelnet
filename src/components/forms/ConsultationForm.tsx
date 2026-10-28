@@ -7,12 +7,12 @@ import provinces from '@/data/locations/provinces.json'
 
 type Ward = { code: string; name: string }
 
-export function ConsultationForm({ packageId, packageName, onClose }: {
-  packageId?: number; packageName?: string; onClose: () => void
+export function ConsultationForm({ packageId, packageName, provinceCode, onClose }: {
+  packageId?: number; packageName?: string; provinceCode?: string; onClose: () => void
 }) {
   const formId = useId()
   const [state, action, pending] = useActionState(submitConsultation, { success: false, message: '' })
-  const [province, setProvince] = useState('')
+  const [province, setProvince] = useState(() => provinces.some((entry) => entry.code === provinceCode) ? provinceCode! : '')
   const [ward, setWard] = useState('')
   const [wards, setWards] = useState<Ward[]>([])
   const [loading, setLoading] = useState(false)

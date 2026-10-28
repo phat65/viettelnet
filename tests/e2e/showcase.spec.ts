@@ -5,11 +5,18 @@ import sharp from 'sharp'
 import { getPayload, type Payload } from 'payload'
 import config from '../../src/payload.config'
 import { catalog } from '../../src/data/catalog'
+import { photoCatalog } from '../../src/migrations/data/photo-catalog-20261028'
+import { storagePackageSlugs } from '../../src/migrations/20261028_234000_remove_storage_packages'
 import { catalogRoutes, groupPath } from '../../src/lib/catalogRoutes'
 
 const provinces: { code: string; name: string }[] = JSON.parse(readFileSync(new URL('../../src/data/locations/provinces.json', import.meta.url), 'utf8'))
 const wardCatalog: Record<string, { code: string; name: string }[]> = JSON.parse(readFileSync(new URL('../../src/data/locations/wards.json', import.meta.url), 'utf8'))
 const getWards = (code: string) => wardCatalog[code]
+const expectedPackages = [...new Map([
+  ...catalog.map((item) => [item.slug, { slug: item.slug, group: item.group }] as const),
+  ...photoCatalog.filter((item) => !storagePackageSlugs.includes(item.slug)).map((item) => [item.slug, { slug: item.slug, group: item.catalogGroup }] as const),
+]).values()]
+const cameraCount = expectedPackages.filter((item) => item.group === 'camera').length
 
 test.describe.configure({ mode: 'serial' })
 let cms: Payload
@@ -41,9 +48,9 @@ test.afterAll(async () => {
   await cms.destroy()
 })
 
-test('shows 18 packages, six groups, and a distinct detail page for every package', async ({ page, request }) => {
+test('shows the migrated catalog, six groups, and detail pages for original packages', async ({ page, request }) => {
   await page.goto('/')
-  await expect(page.locator('.package-card')).toHaveCount(18)
+  await expect(page.locator('.package-card')).toHaveCount(expectedPackages.length)
   await expect(page.locator('.catalog-section')).toHaveCount(6)
   for (const selector of ['.connection-image img', '.mesh-inner img']) {
     const picture = page.locator(selector)
@@ -76,10 +83,10 @@ test('category navigation, canonical URLs, sitemap and legacy redirects agree', 
   expect(target.searchParams.get('utm_source')).toBe('legacy')
 
   await page.goto('/internet')
-  await expect(page.locator('.package-card')).toHaveCount(18)
+  await expect(page.locator('.package-card')).toHaveCount(expectedPackages.length)
   await page.getByRole('navigation', { name: 'Điều hướng chính' }).getByRole('link', { name: 'Camera', exact: true }).click()
   await expect(page).toHaveURL(/\/internet\/camera$/)
-  await expect(page.locator('.package-card')).toHaveCount(4)
+  await expect(page.locator('.package-card')).toHaveCount(cameraCount)
   await expect(page.getByRole('navigation', { name: 'Điều hướng chính' }).getByRole('link', { name: 'Camera', exact: true })).toHaveAttribute('aria-current', 'page')
   await page.evaluate(() => {
     document.documentElement.style.scrollBehavior = 'auto'
@@ -91,7 +98,7 @@ test('category navigation, canonical URLs, sitemap and legacy redirects agree', 
   for (const groupId of Object.keys(catalogRoutes) as (keyof typeof catalogRoutes)[]) {
     await page.goto(groupPath(groupId))
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(catalogRoutes[groupId].title)
-    await expect(page.locator('.package-card')).toHaveCount(catalog.filter((entry) => entry.group === groupId).length)
+    await expect(page.locator('.package-card')).toHaveCount(expectedPackages.filter((entry) => entry.group === groupId).length)
     const canonical = await page.locator('link[rel="canonical"]').getAttribute('href')
     expect(new URL(canonical!).pathname).toBe(groupPath(groupId))
   }
@@ -105,7 +112,9 @@ test('category navigation, canonical URLs, sitemap and legacy redirects agree', 
   expect(sitemap.ok()).toBeTruthy()
   const xml = await sitemap.text()
   expect(xml).not.toContain('/goi-cuoc/')
-  expect(xml.match(/<loc>/g)).toHaveLength(29)
+  expect(xml.match(/<loc>/g)).toHaveLength(11 + expectedPackages.length + provinces.length)
+  for (const slug of ['ha-noi', 'ho-chi-minh', 'da-nang']) expect(xml).toContain(`/internet/khu-vuc/${slug}</loc>`)
+  expect(xml).not.toContain('khu-vuc=')
   expect(xml).toContain('/internet/tv360</loc>')
   expect(xml).toContain('/internet/netvt1</loc>')
   for (const path of ['/gioi-thieu', '/lien-he', '/chinh-sach-bao-mat']) expect(xml).toContain(`${path}</loc>`)
@@ -145,7 +154,7 @@ test('admin edits catalog content and support pages; anonymous writes are denied
     await expect(page.getByText('Tư vấn chọn camera từ admin.', { exact: true })).toBeVisible()
     await page.getByText('Có kiểm tra địa chỉ không?', { exact: true }).click()
     await expect(page.getByText('Có, liên hệ để kiểm tra hạ tầng.', { exact: true })).toBeVisible()
-    await expect(page.locator('.package-card')).toHaveCount(4)
+    await expect(page.locator('.package-card')).toHaveCount(cameraCount)
     await page.goto('/internet/tv360')
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(catalogRoutes.entertainment.title)
     expect((await page.request.post('/api/globals/site-settings', { headers, data: {
@@ -202,17 +211,52 @@ test('each card changes regional price independently and keeps the selection on 
   await page.goto('/')
   const card = page.locator('.package-card').filter({ has: page.getByRole('heading', { name: 'NETVT1', exact: true }) })
   const secondCard = page.locator('.package-card').filter({ has: page.getByRole('heading', { name: 'NETVT2', exact: true }) })
+  await card.getByRole('combobox', { name: 'Tỉnh / thành phố lắp đặt' }).selectOption('da-nang')
+  await secondCard.getByRole('combobox', { name: 'Tỉnh / thành phố lắp đặt' }).selectOption('da-nang')
   await expect(card.locator('.price')).toContainText('195.000')
-  await card.getByRole('radio', { name: 'Hà Nội & TP.HCM' }).check()
+  await card.getByRole('combobox', { name: 'Tỉnh / thành phố lắp đặt' }).selectOption('ha-noi')
   await expect(card.locator('.price')).toContainText('235.000')
   await expect(secondCard.locator('.price')).toContainText('240.000')
   await card.getByRole('link', { name: /Khám phá chi tiết/ }).click()
-  await expect(page).toHaveURL(/khu-vuc=metro/)
+  await expect(page).toHaveURL(/khu-vuc=ha-noi/)
   await expect(page.locator('.price-details')).toContainText('235.000')
-  await page.locator('.article-prices').getByRole('radio', { name: 'Tỉnh / thành khác' }).check()
+  await page.locator('.article-prices').getByRole('combobox').selectOption('da-nang')
   await expect(page.locator('.price-details')).toContainText('195.000')
   await page.goto('/internet/giga1?khu-vuc=other')
   await expect(page.locator('.article-prices')).toContainText('Chưa có giá cho khu vực này')
+})
+
+test('province pages use local pricing, keep the province in details and registration, and have canonical URLs', async ({ page, request }) => {
+  for (const [slug, name, price] of [['ha-noi', 'Hà Nội', '235.000'], ['ho-chi-minh', 'Hồ Chí Minh', '235.000'], ['da-nang', 'Đà Nẵng', '195.000']]) {
+    await page.goto(`/internet/khu-vuc/${slug}`)
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(`Lắp mạng Viettel tại ${name}`)
+    await expect(page).toHaveTitle(new RegExp(name))
+    expect(new URL((await page.locator('link[rel="canonical"]').getAttribute('href'))!).pathname).toBe(`/internet/khu-vuc/${slug}`)
+    const card = page.locator('.package-card').filter({ has: page.getByRole('heading', { name: 'NETVT1', exact: true }) })
+    await expect(card.locator('.price')).toContainText(price)
+    await expect(card.locator('.package-province')).toContainText(name)
+    await expect(card.getByRole('link', { name: /Khám phá chi tiết/ })).toHaveAttribute('href', `/internet/netvt1?khu-vuc=${slug}`)
+    await expect(page.locator('main')).not.toContainText(/metro|Tỉnh\s*\/\s*thành khác/)
+  }
+  await expect(page.locator('#ultra .package-card').first().locator('.price')).toHaveText('Liên hệ')
+  const card = page.locator('.package-card').filter({ has: page.getByRole('heading', { name: 'NETVT1', exact: true }) })
+  await card.getByRole('link', { name: /Khám phá chi tiết/ }).click()
+  await expect(page.locator('.article-prices').getByRole('combobox')).toHaveValue('da-nang')
+  await expect(page.locator('.price-details')).toContainText('195.000')
+  await page.reload()
+  await expect(page.locator('.article-prices').getByRole('combobox')).toHaveValue('da-nang')
+  await page.getByRole('button', { name: 'Đăng ký gói NETVT1', exact: true }).click()
+  await expect(page.getByRole('dialog').getByRole('combobox', { name: 'Tỉnh / thành phố *', exact: true })).toHaveValue('48')
+  await expect(page.getByRole('dialog').getByRole('combobox', { name: 'Phường / xã *', exact: true })).toBeEnabled()
+  await page.keyboard.press('Escape')
+  await page.goto('/internet/khu-vuc/da-nang')
+  await page.getByRole('combobox', { name: 'Tỉnh / thành phố lắp đặt' }).selectOption('ho-chi-minh')
+  await expect(page).toHaveURL(/\/internet\/khu-vuc\/ho-chi-minh$/)
+  await expect(page.locator('.package-province').first()).toContainText('Hồ Chí Minh')
+  await page.setViewportSize({ width: 390, height: 844 })
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy()
+  for (const slug of ['khong-ton-tai', 'metro', 'other']) expect((await request.get(`/internet/khu-vuc/${slug}`)).status()).toBe(404)
 })
 
 test('a registration is attached to the selected package and visible to admin', async ({ page }) => {
@@ -275,7 +319,7 @@ test('shared registration modal resets package and dependent wards, retries load
   const card = page.locator('.package-card').filter({ has: page.getByRole('heading', { name: 'NETVT1', exact: true }) })
   await card.getByRole('button', { name: 'Đăng ký', exact: true }).click()
   await expect(dialog.locator('.registration-package')).toHaveText('Gói quan tâm: NETVT1')
-  await expect(province).toHaveValue('')
+  await expect(province).toHaveValue('1')
   await dialog.locator('.registration-actions').getByRole('button', { name: 'Đóng', exact: true }).click()
   await page.locator('.installation-cta').click()
   await expect(dialog.locator('.registration-package')).toHaveCount(0)
@@ -317,7 +361,7 @@ test('admin creates and edits grouped packages, prices and rich detail; public w
   const headers = { Authorization: `JWT ${token}` }
   const list = await request.get('/api/packages?limit=100', { headers })
   const packages = await list.json()
-  expect(packages.totalDocs).toBe(18)
+  expect(packages.totalDocs).toBe(expectedPackages.length)
   expect((await request.patch(`/api/packages/${packages.docs[0].id}`, { data: { name: 'Must not change' } })).status()).toBe(403)
   expect((await request.post('/api/packages', { data: {} })).status()).toBe(403)
   const created = await request.post('/api/packages', { headers, data: {
@@ -338,7 +382,7 @@ test('admin creates and edits grouped packages, prices and rich detail; public w
   await expect(page.getByText('Bài viết chi tiết gói cước', { exact: true })).toBeVisible()
   await expect(page.locator('[contenteditable="true"]').first()).toBeVisible()
   await page.locator('[contenteditable="true"]').first().fill('Nội dung được sửa trong trình soạn thảo')
-  await page.getByLabel('Giá / tháng (VNĐ)', { exact: false }).first().fill('315000')
+  await page.getByLabel('Giá theo kỳ (VNĐ)', { exact: false }).first().fill('315000')
   const saveResponse = page.waitForResponse((response) => response.url().includes(`/api/packages/${createdPackage.id}`) && response.request().method() === 'PATCH')
   await page.getByRole('button', { name: /Lưu|Save/, exact: false }).last().click()
   expect((await saveResponse).ok()).toBeTruthy()
@@ -349,7 +393,7 @@ test('admin creates and edits grouped packages, prices and rich detail; public w
   await page.goto('/internet/browser-test-package')
   await expect(page.locator('.package-article')).toContainText('Nội dung được sửa trong trình soạn thảo')
   await expect(page.locator('.price-details')).toContainText('315.000')
-  await page.locator('.article-prices').getByRole('radio', { name: 'Tỉnh / thành khác' }).check()
+  await page.locator('.article-prices').getByRole('combobox').selectOption('da-nang')
   await expect(page.locator('.price-details')).toContainText('250.000')
   await page.goto('/')
   await expect(page.locator('#mesh .package-card').filter({ hasText: 'BROWSER TEST' })).toBeVisible()
@@ -365,7 +409,7 @@ test('admin creates and edits grouped packages, prices and rich detail; public w
 test('mobile page and contact selector stay inside the viewport', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/')
-  await expect(page.locator('.package-card')).toHaveCount(18)
+  await expect(page.locator('.package-card')).toHaveCount(expectedPackages.length)
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy()
   await page.getByRole('button', { name: 'Mở menu gói cước' }).click()
   await page.getByRole('navigation', { name: 'Điều hướng chính' }).getByRole('link', { name: 'TV360', exact: true }).click()

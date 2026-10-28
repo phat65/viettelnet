@@ -29,11 +29,7 @@ export async function CatalogLanding({ groupId }: { groupId?: CatalogGroup }) {
       </nav>
       <h1>{heading}</h1>
       <p>{content?.intro?.trim() || (groupId ? catalogRoutes[groupId].guide : 'Từ kết nối hằng ngày đến truyền hình, camera và WiFi cho nhà nhiều tầng. Chọn nhóm dịch vụ để so sánh gói, xem thiết bị và mức giá phù hợp.')}</p>
-      <nav className="catalog-tabs" aria-label="Nhóm gói Internet">
-        <Link href={internetPath} aria-current={!groupId ? 'page' : undefined}>Tất cả gói</Link>
-        {catalogGroups.map((entry) => <Link key={entry.id} href={groupPath(entry.id)} aria-current={groupId === entry.id ? 'page' : undefined}>{entry.id === 'individual' ? 'Internet cá nhân' : entry.label}</Link>)}
-      </nav>
-      <p className="catalog-price-note">Chọn Hà Nội & TP.HCM hoặc tỉnh/thành khác trên thẻ để xem giá. Địa chỉ lắp đặt cụ thể sẽ được chọn khi đăng ký.</p>
+      <p className="catalog-price-note">Chọn tỉnh / thành phố trên thẻ để xem giá tại địa phương. Địa chỉ lắp đặt cụ thể sẽ được xác nhận khi đăng ký.</p>
     </div>
     <PackageList packages={packages} groupId={groupId} />
     {content?.advice && <div className="container managed-content"><RichText data={content.advice} /></div>}

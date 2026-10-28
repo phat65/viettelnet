@@ -23,6 +23,7 @@ export function validatePackageSlug(value: unknown): true | string {
 }
 
 export const catalogNavigation = [
+  { label: 'Trang chủ', href: '/' },
   { label: 'Internet', href: internetPath },
   { label: 'TV360', href: groupPath('entertainment') },
   { label: 'Camera', href: groupPath('camera') },

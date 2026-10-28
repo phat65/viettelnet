@@ -2,6 +2,7 @@ import type { NextConfig } from 'next'
 import { withPayload } from '@payloadcms/next/withPayload'
 
 const nextConfig: NextConfig = {
+  distDir: process.env.CATALOG_TEST_MODE === '1' ? '.next-catalog-test' : '.next',
   poweredByHeader: false,
   output: 'standalone',
   async redirects() {

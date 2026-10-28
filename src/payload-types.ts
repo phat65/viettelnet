@@ -169,7 +169,14 @@ export interface Package {
    */
   slug: string;
   category: 'internet' | 'tv360' | 'camera';
+  /**
+   * Nhập 0 cho Camera/Cloud bán riêng, không bao gồm đường truyền Internet.
+   */
   speed: number;
+  /**
+   * Ví dụ /tháng, /tháng/camera hoặc /bộ. Ghi rõ thời hạn Cloud trong thiết bị/dịch vụ đi kèm.
+   */
+  priceUnit?: string | null;
   image?: (number | null) | Media;
   prices: {
     region: 'reference' | 'metro' | 'other';
@@ -383,6 +390,7 @@ export interface PackagesSelect<T extends boolean = true> {
   slug?: T;
   category?: T;
   speed?: T;
+  priceUnit?: T;
   image?: T;
   prices?:
     | T

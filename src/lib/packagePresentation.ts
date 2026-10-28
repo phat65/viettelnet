@@ -9,3 +9,7 @@ export function packagePrice(item: Package, region: Region) {
 export function speedLabel(speed: number) {
   return speed >= 1000 ? { value: String(speed / 1000), unit: 'Gbps' } : { value: String(speed), unit: 'Mbps' }
 }
+
+export function packagePriceUnit(item: Pick<Package, 'priceUnit'>) {
+  return item.priceUnit?.trim() || '/tháng'
+}

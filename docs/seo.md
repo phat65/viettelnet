@@ -24,16 +24,19 @@ DNS trỏ đúng giúp truy cập website; chứng chỉ HTTPS xác minh quyền
 | Ultra Speed | `/internet/ultra-speed` |
 | Combo ưu đãi | `/internet/uu-dai` |
 | Một gói cụ thể | `/internet/netvt1`, `/internet/meshvt1-cam1`… |
+| Gói và giá tại tỉnh/thành | `/internet/khu-vuc/ha-noi`, `/internet/khu-vuc/ho-chi-minh`, `/internet/khu-vuc/da-nang`… |
 
 Menu đầu trang dẫn đến các trang danh mục thật, không chỉ cuộn đến fragment `/#camera`. Breadcrumb ở trang gói dẫn về Internet và nhóm tương ứng. Trang chủ vẫn giữ showcase và các anchor cũ để liên kết đã chia sẻ tiếp tục cuộn được.
 
 URL cũ `/goi-cuoc/:slug` chuyển hướng vĩnh viễn **308** sang `/internet/:slug`, giữ query như `?khu-vuc=other`. Canonical và sitemap chỉ dùng URL mới. Giữ redirect này sau khi cập nhật và gửi lại sitemap trong Search Console; không xóa redirect ngay khi Google bắt đầu thấy URL mới.
 
-Khu vực giá vẫn chọn ngay trên thẻ và trang gói. Không tạo thêm trang tỉnh/phường chỉ đổi tên địa danh. Đường dẫn gói không phụ thuộc nhóm để khi admin chuyển nhóm, liên kết gói vẫn giữ nguyên. Không dùng các slug danh mục (`tv360`, `camera`…) cho một gói riêng.
+Khách chọn tên tỉnh/thành trên thẻ và trang gói. Trang `/internet/khu-vuc/<tinh>` có bảng giá theo địa phương, thông tin quy trình lắp đặt và form tự chọn sẵn tỉnh; không khẳng định hạ tầng có sẵn tại mọi địa chỉ. Danh mục dùng chung với form đăng ký (hiện có 34 tỉnh/thành). Hà Nội và Hồ Chí Minh ánh xạ vào giá `metro`, các tỉnh/thành còn lại dùng `other`; mã vùng chỉ dùng nội bộ, không hiển thị trên giao diện công khai. Gói không có giá phù hợp hiện “Liên hệ”; giá `reference` được ghi rõ là tham khảo.
+
+Liên kết chi tiết giữ địa phương bằng `?khu-vuc=da-nang` (tương tự với tỉnh khác). Các liên kết cũ `metro`/`other` vẫn lấy đúng vùng giá; `other` không tự gán cho một tỉnh bất kỳ. Khi chưa chọn địa phương, thẻ gói và trang chi tiết mặc định Hà Nội, hiển thị rõ lựa chọn và cho phép đổi tỉnh. Trang khu vực có canonical riêng; trang gói vẫn canonical về URL gói không có query. Đường dẫn gói không phụ thuộc nhóm để khi admin chuyển nhóm, liên kết gói vẫn giữ nguyên. Không dùng các slug danh mục (`tv360`, `camera`, `khu-vuc`…) cho một gói riêng.
 
 - Website xuất HTML từ server, có liên kết từ trang chủ đến từng gói.
 - `/robots.txt` cho phép website công khai, chặn crawl `/admin` và `/api/`. Robots không phải cơ chế bảo mật; quyền truy cập vẫn do ứng dụng kiểm tra.
-- `/sitemap.xml` tự liệt kê trang chủ, danh mục Internet, các nhóm có gói đang bán và từng gói; lấy ngày cập nhật từ dữ liệu gói.
+- `/sitemap.xml` tự liệt kê trang chủ, trang hỗ trợ, danh mục Internet, các nhóm có gói đang bán, trang tỉnh/thành và từng gói; lấy ngày cập nhật từ dữ liệu gói. Xuất bản gói mới tự cập nhật cả sitemap và các trang khu vực, không cần thêm URL sitemap mới.
 - Trang chủ có title, description và canonical về `/`. Trang gói có canonical về đường dẫn không chứa bộ chọn giá `?khu-vuc=...`.
 - Tiêu đề gói mặc định nêu tên và tốc độ; có thể ghi đè bằng `Tiêu đề SEO` và `Mô tả SEO` trong admin. Open Graph cung cấp tiêu đề/mô tả khi chia sẻ liên kết, không phải cam kết tăng thứ hạng.
 - Khi deploy, đặt `NEXT_PUBLIC_SERVER_URL=https://viettelnet.store` và build lại để metadata/sitemap dùng domain thật.
